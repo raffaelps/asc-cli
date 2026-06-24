@@ -55,8 +55,9 @@ Grab the binary for your platform from the
 | Platform | Asset |
 |---|---|
 | macOS (Apple Silicon) | `asc-macos-arm64.tar.gz` |
-| macOS (Intel) | `asc-macos-x86_64.tar.gz` |
 | Linux (x86_64) | `asc-linux-x86_64.tar.gz` |
+
+> Intel Macs are not supported — only Apple Silicon binaries are published.
 
 ```bash
 tar -xzf asc-macos-arm64.tar.gz
