@@ -26,6 +26,9 @@ to clone.
   - [Performance & crash metrics](#performance--crash-metrics)
   - [Version comparison](#version-comparison)
   - [TestFlight](#testflight)
+  - [Customer reviews](#customer-reviews)
+  - [Diagnostics](#diagnostics)
+  - [Webhooks](#webhooks)
 - [JSON output](#json-output)
 - [Exit codes](#exit-codes)
 - [Use in GitHub Actions / CI](#use-in-github-actions--ci)
@@ -316,6 +319,56 @@ List recent TestFlight builds and their processing state.
 ```bash
 asc-cli testflight builds com.example.myapp
 asc-cli testflight builds com.example.myapp --limit 50 --json
+```
+
+#### `asc-cli builds latest <app>`
+The most recently uploaded build and whether it finished processing
+(`ready: true` once `processingState` is `VALID`). Closes the loop after a CI
+upload.
+
+```bash
+asc-cli builds latest com.example.myapp --json
+```
+
+### Customer reviews
+
+#### `asc-cli reviews list <app>`
+Recent reviews, newest first. Filter by rating or territory.
+
+```bash
+asc-cli reviews list com.example.myapp --limit 20
+asc-cli reviews list com.example.myapp --rating 1 --json   # only 1-star
+```
+
+#### `asc-cli reviews reply <review-id> --body "..."`
+Publish a **public** developer response to a review. Prompts to confirm; pass
+`--yes` in CI.
+
+```bash
+asc-cli reviews reply 00000000-... --body "Thanks for the feedback!"
+```
+
+### Diagnostics
+
+#### `asc-cli diagnostics <app>`
+Diagnostic signatures (hangs / disk writes) for a build — defaults to the latest.
+Complements `metrics` with per-build detail.
+
+```bash
+asc-cli diagnostics com.example.myapp
+asc-cli diagnostics com.example.myapp --type HANGS --json
+```
+
+### Webhooks
+
+> Requires an **Admin** App Store Connect API key (read/manage webhooks is not
+> available to lower roles).
+
+```bash
+asc-cli webhooks list <app>
+asc-cli webhooks create <app> --url https://example.com/hook --secret S3CR3T --events APP_STORE_VERSION_APP_VERSION_STATE_UPDATED
+asc-cli webhooks deliveries <webhook-id>   # delivery history, for debugging
+asc-cli webhooks delete <webhook-id>
 ```
 
 ---
