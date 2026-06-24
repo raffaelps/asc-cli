@@ -17,6 +17,7 @@ to clone.
 - [Install](#install)
 - [Configure credentials](#configure-credentials)
 - [Quick start](#quick-start)
+- [Use as an AI agent (MCP)](#use-as-an-ai-agent-mcp)
 - [Command reference](#command-reference)
   - [Apps](#apps)
   - [Status & summary](#status--summary)
@@ -114,6 +115,79 @@ asc metrics 1234567890              # performance & crash metrics
 
 Most commands take an **app reference** that is either the numeric **app id** or
 the **bundle id** — the CLI resolves a bundle id automatically.
+
+---
+
+## Use as an AI agent (MCP)
+
+`asc` ships a built-in [MCP](https://modelcontextprotocol.io) server, so AI tools
+that speak MCP — **Claude** (Desktop, Code), **Cursor**, **Kiro**, Windsurf, Zed
+— can call App Store Connect directly as structured tools.
+
+Start it with:
+
+```bash
+asc mcp                  # read-only tools
+asc mcp --enable-writes  # also expose rollout pause/resume/release
+```
+
+By default only **read** tools are exposed (`app_status`, `performance_metrics`,
+`compare_versions`, `list_apps`, …). The destructive rollout-control tools are
+opt-in via `--enable-writes` and are tagged with MCP's `destructiveHint`, so the
+client asks you to confirm before running them.
+
+### Claude Desktop
+
+Add to `claude_desktop_config.json`:
+
+```jsonc
+{
+  "mcpServers": {
+    "appstoreconnect": {
+      "command": "asc",
+      "args": ["mcp"],
+      "env": {
+        "ASC_ISSUER_ID": "00000000-0000-0000-0000-000000000000",
+        "ASC_KEY_ID": "ABCD1234EF",
+        "ASC_PRIVATE_KEY_PATH": "/path/to/AuthKey_ABCD1234EF.p8"
+      }
+    }
+  }
+}
+```
+
+### Claude Code
+
+```bash
+claude mcp add appstoreconnect \
+  --env ASC_ISSUER_ID=... --env ASC_KEY_ID=... --env ASC_PRIVATE_KEY_PATH=/path/AuthKey.p8 \
+  -- asc mcp
+```
+
+### Cursor / Kiro / Windsurf
+
+These use the same shape in their MCP config (`.cursor/mcp.json` for Cursor):
+
+```jsonc
+{
+  "mcpServers": {
+    "appstoreconnect": {
+      "command": "asc",
+      "args": ["mcp"],
+      "env": {
+        "ASC_ISSUER_ID": "...",
+        "ASC_KEY_ID": "...",
+        "ASC_PRIVATE_KEY_PATH": "/path/to/AuthKey.p8"
+      }
+    }
+  }
+}
+```
+
+To allow rollout control, change `"args": ["mcp"]` to `"args": ["mcp", "--enable-writes"]`.
+
+Then ask your assistant things like *"What's the status of app 1234567890?"* or
+*"Did the latest version regress on any metric?"* — it calls the tools itself.
 
 ---
 
