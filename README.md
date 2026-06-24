@@ -15,6 +15,7 @@ to clone.
 ## Table of contents
 
 - [Install](#install)
+- [Updating](#updating)
 - [Configure credentials](#configure-credentials)
 - [Quick start](#quick-start)
 - [Use as an AI agent (MCP)](#use-as-an-ai-agent-mcp)
@@ -45,11 +46,7 @@ brew tap raffaelps/asc-cli https://github.com/raffaelps/asc-cli
 brew install asc-cli
 ```
 
-Update later with:
-
-```bash
-brew update && brew upgrade asc-cli
-```
+To update later, see [Updating](#updating) — both steps are required.
 
 ### Direct binary download
 
@@ -71,6 +68,30 @@ asc-cli --version
 
 > **macOS Gatekeeper:** if you downloaded the binary manually (not via Homebrew)
 > and macOS blocks it, clear the quarantine flag: `xattr -d com.apple.quarantine ./asc`.
+
+---
+
+## Updating
+
+Homebrew does **not** refresh third-party taps automatically, so always run both
+steps — in this order:
+
+```bash
+brew update           # 1) refresh the tap (pull the new formula)
+brew upgrade asc-cli  # 2) then upgrade the binary
+```
+
+> Running `brew upgrade asc-cli` on its own may report
+> `already installed` even when a newer version exists — that just means the
+> local tap is stale. `brew update` fixes it.
+
+If you ever tapped an older version and `brew install` can't find the formula,
+re-tap fresh:
+
+```bash
+brew untap raffaelps/asc-cli
+brew tap raffaelps/asc-cli https://github.com/raffaelps/asc-cli
+```
 
 ---
 
