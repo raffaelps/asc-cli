@@ -1,4 +1,4 @@
-# asc-tool — App Store Connect CLI
+# asc-cli — App Store Connect CLI
 
 [![Release](https://img.shields.io/github/v/release/raffaelps/asc-cli?label=release)](https://github.com/raffaelps/asc-cli/releases)
 
@@ -39,13 +39,13 @@ to clone.
 
 ```bash
 brew tap raffaelps/asc-cli https://github.com/raffaelps/asc-cli
-brew install asc-tool
+brew install asc-cli
 ```
 
 Update later with:
 
 ```bash
-brew update && brew upgrade asc-tool
+brew update && brew upgrade asc-cli
 ```
 
 ### Direct binary download
@@ -62,8 +62,8 @@ Grab the binary for your platform from the
 
 ```bash
 tar -xzf asc-macos-arm64.tar.gz
-sudo mv asc-tool /usr/local/bin/
-asc-tool --version
+sudo mv asc-cli /usr/local/bin/
+asc-cli --version
 ```
 
 > **macOS Gatekeeper:** if you downloaded the binary manually (not via Homebrew)
@@ -108,9 +108,9 @@ No token is stored or refreshed — the CLI mints a fresh one per call.
 ## Quick start
 
 ```bash
-asc-tool apps list                       # all apps in your account
-asc-tool status com.example.myapp        # live version + in-flight + latest build
-asc-tool metrics 1234567890              # performance & crash metrics
+asc-cli apps list                       # all apps in your account
+asc-cli status com.example.myapp        # live version + in-flight + latest build
+asc-cli metrics 1234567890              # performance & crash metrics
 ```
 
 Most commands take an **app reference** that is either the numeric **app id** or
@@ -120,15 +120,15 @@ the **bundle id** — the CLI resolves a bundle id automatically.
 
 ## Use as an AI agent (MCP)
 
-`asc-tool` ships a built-in [MCP](https://modelcontextprotocol.io) server, so AI tools
+`asc-cli` ships a built-in [MCP](https://modelcontextprotocol.io) server, so AI tools
 that speak MCP — **Claude** (Desktop, Code), **Cursor**, **Kiro**, Windsurf, Zed
 — can call App Store Connect directly as structured tools.
 
 Start it with:
 
 ```bash
-asc-tool mcp                  # read-only tools
-asc-tool mcp --enable-writes  # also expose rollout pause/resume/release
+asc-cli mcp                  # read-only tools
+asc-cli mcp --enable-writes  # also expose rollout pause/resume/release
 ```
 
 By default only **read** tools are exposed (`app_status`, `performance_metrics`,
@@ -144,7 +144,7 @@ Add to `claude_desktop_config.json`:
 {
   "mcpServers": {
     "appstoreconnect": {
-      "command": "asc-tool",
+      "command": "asc-cli",
       "args": ["mcp"],
       "env": {
         "ASC_ISSUER_ID": "00000000-0000-0000-0000-000000000000",
@@ -161,7 +161,7 @@ Add to `claude_desktop_config.json`:
 ```bash
 claude mcp add appstoreconnect \
   --env ASC_ISSUER_ID=... --env ASC_KEY_ID=... --env ASC_PRIVATE_KEY_PATH=/path/AuthKey.p8 \
-  -- asc-tool mcp
+  -- asc-cli mcp
 ```
 
 ### Cursor / Kiro / Windsurf
@@ -172,7 +172,7 @@ These use the same shape in their MCP config (`.cursor/mcp.json` for Cursor):
 {
   "mcpServers": {
     "appstoreconnect": {
-      "command": "asc-tool",
+      "command": "asc-cli",
       "args": ["mcp"],
       "env": {
         "ASC_ISSUER_ID": "...",
@@ -193,26 +193,26 @@ Then ask your assistant things like *"What's the status of app 1234567890?"* or
 
 ## Command reference
 
-Run `asc-tool --help` or `asc <command> --help` for full options at any time.
+Run `asc-cli --help` or `asc <command> --help` for full options at any time.
 Add `--json` to any command for machine-readable output.
 
 ### Apps
 
-#### `asc-tool apps list`
+#### `asc-cli apps list`
 List every app in the account.
 
 ```bash
-asc-tool apps list
-asc-tool apps list --limit 10 --json
+asc-cli apps list
+asc-cli apps list --limit 10 --json
 ```
 
-#### `asc-tool apps get <app>`
+#### `asc-cli apps get <app>`
 Show every attribute of a single app. Optionally enrich with related resources
 via `--include` (comma-separated).
 
 ```bash
-asc-tool apps get com.example.myapp
-asc-tool apps get com.example.myapp --include localizations,betaGroups,versions,builds --json
+asc-cli apps get com.example.myapp
+asc-cli apps get com.example.myapp --include localizations,betaGroups,versions,builds --json
 ```
 
 | `--include` value | Adds |
@@ -224,31 +224,31 @@ asc-tool apps get com.example.myapp --include localizations,betaGroups,versions,
 
 ### Status & summary
 
-#### `asc-tool status <app>`
+#### `asc-cli status <app>`
 One-shot health summary: the live (published) version, any version currently
 in-flight (in review / pending), and the latest TestFlight build.
 
 ```bash
-asc-tool status com.example.myapp
-asc-tool status com.example.myapp --json
+asc-cli status com.example.myapp
+asc-cli status com.example.myapp --json
 ```
 
 ### App Store versions
 
-#### `asc-tool versions status <app>`
+#### `asc-cli versions status <app>`
 List App Store versions and their states (`READY_FOR_SALE`, `IN_REVIEW`,
 `PENDING_DEVELOPER_RELEASE`, `REJECTED`, …).
 
 ```bash
-asc-tool versions status com.example.myapp
+asc-cli versions status com.example.myapp
 ```
 
-#### `asc-tool versions rollout <app>`
+#### `asc-cli versions rollout <app>`
 Show phased-release progress of the live version: state, current day, and the
 percentage of users it has reached.
 
 ```bash
-asc-tool versions rollout com.example.myapp
+asc-cli versions rollout com.example.myapp
 ```
 
 Apple's fixed schedule: day 1 = 1%, 2 = 2%, 3 = 5%, 4 = 10%, 5 = 20%, 6 = 50%,
@@ -259,63 +259,63 @@ Apple's fixed schedule: day 1 = 1%, 2 = 2%, 3 = 5%, 4 = 10%, 5 = 20%, 6 = 50%,
 These **change the live rollout**, so they ask for confirmation. Pass `--yes`
 (`-y`) to skip the prompt in automation.
 
-#### `asc-tool versions pause <app>`
+#### `asc-cli versions pause <app>`
 Pause the phased rollout.
 
-#### `asc-tool versions resume <app>`
+#### `asc-cli versions resume <app>`
 Resume a paused rollout.
 
-#### `asc-tool versions release <app>`
+#### `asc-cli versions release <app>`
 Complete the rollout — release to **all** users immediately (irreversible).
 
 ```bash
-asc-tool versions pause com.example.myapp
-asc-tool versions resume com.example.myapp
-asc-tool versions release com.example.myapp --yes
+asc-cli versions pause com.example.myapp
+asc-cli versions resume com.example.myapp
+asc-cli versions release com.example.myapp --yes
 ```
 
 ### Performance & crash metrics
 
-#### `asc-tool metrics <app>`
+#### `asc-cli metrics <app>`
 Aggregated Power & Performance metrics (from MetricKit): crashes/terminations,
 hangs, launch time, memory, battery, disk, animation, storage — with median
 (p50) and tail (p90) values per latest version, plus any regressions Apple has
 flagged.
 
 ```bash
-asc-tool metrics com.example.myapp                  # all categories
-asc-tool metrics com.example.myapp -c TERMINATION   # one category (crash proxy)
-asc-tool metrics com.example.myapp -c HANG --json
+asc-cli metrics com.example.myapp                  # all categories
+asc-cli metrics com.example.myapp -c TERMINATION   # one category (crash proxy)
+asc-cli metrics com.example.myapp -c HANG --json
 ```
 
 **CI gates** (exit non-zero on failure):
 
 ```bash
-asc-tool metrics <app> --fail-on-regression           # fail if Apple flagged a regression
-asc-tool metrics <app> -c TERMINATION --fail-above 1.0 # fail if median crash rate exceeds 1.0/day
+asc-cli metrics <app> --fail-on-regression           # fail if Apple flagged a regression
+asc-cli metrics <app> -c TERMINATION --fail-above 1.0 # fail if median crash rate exceeds 1.0/day
 ```
 
 ### Version comparison
 
-#### `asc-tool compare <app>`
+#### `asc-cli compare <app>`
 Compare two versions' metrics and report each metric's percent change. All
 metrics are lower-is-better, so a **positive change is a regression**. Defaults
 to the two latest versions with data.
 
 ```bash
-asc-tool compare com.example.myapp                       # two latest versions
-asc-tool compare com.example.myapp --from 6.4.0 --to 6.6.0
-asc-tool compare com.example.myapp --fail-above-pct 25   # fail if a metric worsened >25%
+asc-cli compare com.example.myapp                       # two latest versions
+asc-cli compare com.example.myapp --from 6.4.0 --to 6.6.0
+asc-cli compare com.example.myapp --fail-above-pct 25   # fail if a metric worsened >25%
 ```
 
 ### TestFlight
 
-#### `asc-tool testflight builds <app>`
+#### `asc-cli testflight builds <app>`
 List recent TestFlight builds and their processing state.
 
 ```bash
-asc-tool testflight builds com.example.myapp
-asc-tool testflight builds com.example.myapp --limit 50 --json
+asc-cli testflight builds com.example.myapp
+asc-cli testflight builds com.example.myapp --limit 50 --json
 ```
 
 ---
@@ -326,7 +326,7 @@ Every command accepts `--json`, emitting structured output to stdout — ideal f
 piping into `jq`, feeding AI tools, or parsing in CI.
 
 ```bash
-asc-tool status com.example.myapp --json | jq '.liveVersion'
+asc-cli status com.example.myapp --json | jq '.liveVersion'
 ```
 
 ---
@@ -364,11 +364,11 @@ jobs:
       - name: Install asc
         run: |
           brew tap raffaelps/asc-cli https://github.com/raffaelps/asc-cli
-          brew install asc-tool
+          brew install asc-cli
       - name: Status
-        run: asc-tool status com.example.myapp
+        run: asc-cli status com.example.myapp
       - name: Fail on metric regression
-        run: asc-tool metrics com.example.myapp --fail-on-regression
+        run: asc-cli metrics com.example.myapp --fail-on-regression
 ```
 
 For CI, set `ASC_PRIVATE_KEY` to the **contents** of the `.p8` (escaped newlines
