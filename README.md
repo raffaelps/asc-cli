@@ -29,6 +29,10 @@ to clone.
   - [TestFlight](#testflight)
   - [Customer reviews](#customer-reviews)
   - [Diagnostics](#diagnostics)
+  - [Store page metadata](#store-page-metadata)
+  - [Review submission](#review-submission)
+  - [Release workflow](#release-workflow)
+  - [Sales reports](#sales-reports)
   - [Webhooks](#webhooks)
 - [JSON output](#json-output)
 - [Exit codes](#exit-codes)
@@ -278,6 +282,18 @@ asc-cli versions rollout com.example.myapp
 Apple's fixed schedule: day 1 = 1%, 2 = 2%, 3 = 5%, 4 = 10%, 5 = 20%, 6 = 50%,
 7 = 100%.
 
+#### `asc-cli versions create <app> --version <X>`
+Create a new, editable App Store version (the prerequisite for editing store
+metadata, since live versions are read-only).
+
+#### `asc-cli versions wait <app> --state <STATE>`
+Block until any version reaches a state — useful in CI pipelines.
+
+```bash
+asc-cli versions create com.example.myapp --version 6.7.0
+asc-cli versions wait com.example.myapp --state READY_FOR_SALE --timeout 3600
+```
+
 ### Phased rollout control
 
 These **change the live rollout**, so they ask for confirmation. Pass `--yes`
@@ -351,6 +367,25 @@ upload.
 asc-cli builds latest com.example.myapp --json
 ```
 
+#### `asc-cli builds wait <app>`
+Block until the latest build finishes processing — exits `0` when `VALID`,
+non-zero on a failure state, `124` on timeout. Ideal right after a CI upload.
+
+```bash
+asc-cli builds wait com.example.myapp --timeout 1800 --interval 30
+```
+
+#### Beta groups & testers
+List groups and testers; manage testers (writes prompt for confirmation).
+
+```bash
+asc-cli testflight groups com.example.myapp
+asc-cli testflight testers com.example.myapp --group <group-id>
+asc-cli testflight add-tester --group <group-id> --email t@example.com --first Ada --last Lovelace
+asc-cli testflight remove-tester --group <group-id> --tester <tester-id>
+asc-cli testflight create-group com.example.myapp --name "Beta crew"
+```
+
 ### Customer reviews
 
 #### `asc-cli reviews list <app>`
@@ -378,6 +413,59 @@ Complements `metrics` with per-build detail.
 ```bash
 asc-cli diagnostics com.example.myapp
 asc-cli diagnostics com.example.myapp --type HANGS --json
+```
+
+### Store page metadata
+
+Read and edit per-locale store text (description, keywords, what's new,
+promotional text, marketing/support URLs). Editing targets the **editable**
+version — create one first with `versions create` if needed.
+
+```bash
+asc-cli localizations list com.example.myapp
+asc-cli localizations get com.example.myapp --locale en-US
+asc-cli localizations set com.example.myapp --locale en-US \
+  --whats-new "Bug fixes and improvements" --keywords "bible,prayer,verse"
+```
+
+Editable fields: `--description`, `--keywords`, `--whats-new`, `--promo`,
+`--marketing-url`, `--support-url`. Set one locale per call.
+
+### Review submission
+
+```bash
+asc-cli submissions com.example.myapp          # submission history
+asc-cli submit com.example.myapp               # submit the editable version (prompts)
+asc-cli submit com.example.myapp --version 6.7.0 --yes
+```
+
+### Release workflow
+
+#### `asc-cli release status <app>`
+One dashboard combining live version + rollout, in-flight version + its
+submission state, and latest build readiness.
+
+```bash
+asc-cli release status com.example.myapp --json
+```
+
+#### `asc-cli release ship <app>`
+Ensure an editable version exists (create it with `--version` if none) and
+submit it for review. Prompts to confirm; `--no-submit` prepares only.
+
+```bash
+asc-cli release ship com.example.myapp --version 6.7.0
+```
+
+### Sales reports
+
+> Requires a **Finance** (or Admin) API key and your account's **vendor number**
+> (App Store Connect → Payments and Financial Reports).
+
+Download and summarize a sales report (units by title and country):
+
+```bash
+asc-cli sales <vendor-number> --date 2026-06-22 --frequency DAILY --json
 ```
 
 ### Webhooks
@@ -413,6 +501,7 @@ asc-cli status com.example.myapp --json | jq '.liveVersion'
 | `1` | API error (e.g. the request was rejected) |
 | `2` | Configuration error (missing/invalid credentials or arguments) |
 | `3` | A CI gate failed (`--fail-on-regression`, `--fail-above`, `--fail-above-pct`) |
+| `124` | A `wait` command timed out |
 
 ---
 
