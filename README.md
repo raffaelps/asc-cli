@@ -462,10 +462,21 @@ asc-cli release ship com.example.myapp --version 6.7.0
 > Requires a **Finance** (or Admin) API key and your account's **vendor number**
 > (App Store Connect → Payments and Financial Reports).
 
-Download and summarize a sales report (units by title and country):
+Download and summarize a sales report. The raw "Units" column mixes first-time
+downloads, app updates, and in-app purchases, so the summary reports each
+separately:
 
 ```bash
-asc-cli sales <vendor-number> --date 2026-06-22 --frequency DAILY --json
+asc-cli sales <vendor-number> --date 2026-06-22
+# -> downloads: 533  updates: 5840  iap: 5  totalUnits: 6378
+```
+
+`byTitle`/`byCountry` are scoped to `--category` (default `downloads`; also
+`updates`, `iap`, or `all`). The report is account-wide (all apps under the
+vendor) and lags ~1–2 days. `WEEKLY` needs a Sunday date; `MONTHLY` a `YYYY-MM`.
+
+```bash
+asc-cli sales <vendor-number> --date 2026-06-22 --category all --json
 ```
 
 ### Webhooks
