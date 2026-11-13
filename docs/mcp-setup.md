@@ -217,6 +217,19 @@ permissions still apply; leave writes disabled for reporting-only workflows.
 
 ## Verify and troubleshoot
 
+Analytics examples after an ONGOING subscription exists for the app:
+
+- Ask `analytics_sessions` to show sessions, duration and unique-device bounds
+  by `osVersion`, `appVersion`, `device` or `territory`.
+- Ask `analytics_acquisition` for discovery events and downloads by source.
+- Ask `analytics_purchases` for estimated sales and proceeds in USD.
+- Ask `analytics_subscription_status` for a daily state snapshot, or
+  `analytics_subscription_events` for conversions, renewals and churn.
+
+These are read-only tools. Ask the assistant to include the processing date
+and actual event dates. Unique counts spanning rows are bounds, not exact totals.
+Subscription setup is a separate write action and is not run automatically.
+
 1. Run `asc-cli --version` and `asc-cli mcp --help` in the environment where the
    AI client runs. After updating the binary, restart its MCP process.
 2. Confirm the server is connected, then ask: “Use appstoreconnect to list my
