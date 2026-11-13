@@ -148,6 +148,8 @@ the **bundle id** — the CLI resolves a bundle id automatically.
 
 ## Use as an AI agent (MCP)
 
+See the [MCP installation guide](docs/mcp-setup.md) for Codex, Claude, Cursor, VS Code/Copilot, Gemini CLI, and Windsurf setup.
+
 `asc-cli` ships a built-in [MCP](https://modelcontextprotocol.io) server, so AI tools
 that speak MCP — **Claude** (Desktop, Code), **Cursor**, **Kiro**, Windsurf, Zed
 — can call App Store Connect directly as structured tools.
